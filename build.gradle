@@ -18,7 +18,7 @@ repositories {
 	}
 }
 
-version = "${project.minecraftVersion}-${modVersion}${modVersionValue}"
+version = "${modVersion}${modVersionValue}"
 group= "tamaized.voidfog"
 archivesBaseName = "VoidFog"
 
