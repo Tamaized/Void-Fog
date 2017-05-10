@@ -1,0 +1,16 @@
+[
+{
+  "modid": "voidfog",
+  "name": "Void Fog",
+  "description": "Brings back the old Void Fog",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Tamaized"],
+  "credits": "Tamaized",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
