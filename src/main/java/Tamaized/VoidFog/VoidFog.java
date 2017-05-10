@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = VoidFog.modid, name = "VoidFog", version = VoidFog.version, clientSideOnly = true)
+@Mod(modid = VoidFog.modid, name = "VoidFog", version = VoidFog.version, clientSideOnly = true, acceptedMinecraftVersions = "[1.8,1.11.2)")
 public class VoidFog {
 
 	public final static String version = "${version}";
