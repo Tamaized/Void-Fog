@@ -42,7 +42,7 @@ public class FogEvent {
 				IBlockState block = world.getBlockState(new BlockPos(i1, j1, k1));
 
 				if (block.getMaterial() == Material.AIR) {
-					if (world.rand.nextInt(8) > j1 && world.getWorldInfo().getTerrainType() != WorldType.FLAT && !world.provider.hasNoSky()) {
+					if ((world.rand.nextInt(8) > (VoidFog.voidcraft && world.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid() ? 0 : j1)) && ((world.getWorldInfo().getTerrainType() != WorldType.FLAT && !world.provider.hasNoSky()) || (VoidFog.voidcraft && world.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid()))) {
 						world.spawnParticle(EnumParticleTypes.SUSPENDED_DEPTH, (double) ((float) i1 + world.rand.nextFloat()), (double) ((float) j1 + world.rand.nextFloat()), (double) ((float) k1 + world.rand.nextFloat()), 0.0D, 0.0D, 0.0D);
 					}
 				} else {
@@ -61,8 +61,8 @@ public class FogEvent {
 			flag = ((EntityPlayer) entity).capabilities.isCreativeMode;
 		}
 		float f1 = e.getFarPlaneDistance();
-		if (worldclient.getWorldInfo().getTerrainType() != WorldType.FLAT && !worldclient.provider.hasNoSky() && !flag) {
-			double d0 = (double) ((entity.getBrightnessForRender((float) e.getRenderPartialTicks()) & 15728640) >> 20) / 16.0D + (entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double) e.getRenderPartialTicks() + 4.0D) / 32.0D;
+		if ((worldclient.getWorldInfo().getTerrainType() != WorldType.FLAT && !worldclient.provider.hasNoSky() && !flag ) || (VoidFog.voidcraft && worldclient.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid())) {
+			double d0 = (double) ((entity.getBrightnessForRender((float) e.getRenderPartialTicks()) & 15728640) >> 20) / 16.0D + ((VoidFog.voidcraft && worldclient.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid()) ? 15 : (entity.lastTickPosY + (entity.posY - entity.lastTickPosY)) * (double) e.getRenderPartialTicks() + 4.0D) / 32.0D;
 
 			if (d0 < 1.0D) {
 				if (d0 < 0.0D) {
@@ -114,6 +114,7 @@ public class FogEvent {
 			}
 
 			d0 *= d0;
+			if((VoidFog.voidcraft && worldclient.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid())) d0 = 0;
 			e.setRed((float) ((double) e.getRed() * d0));
 			e.setGreen((float) ((double) e.getGreen() * d0));
 			e.setBlue((float) ((double) e.getBlue() * d0));
