@@ -1,14 +1,10 @@
 package Tamaized.VoidFog;
 
-import java.util.Random;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GLContext;
-
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumParticleTypes;
@@ -20,12 +16,16 @@ import net.minecraftforge.client.event.EntityViewRenderEvent.FogColors;
 import net.minecraftforge.client.event.EntityViewRenderEvent.RenderFogEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import org.lwjgl.opengl.GLContext;
+
+import java.util.Random;
 
 public class FogEvent {
 
 	@SubscribeEvent
 	public void particles(ClientTickEvent e) {
-		if(Minecraft.getMinecraft().isGamePaused()) return;
+		if (Minecraft.getMinecraft().isGamePaused())
+			return;
 		EntityPlayer player = Minecraft.getMinecraft().player;
 		World world = Minecraft.getMinecraft().world;
 		if (player != null && world != null) {
@@ -61,8 +61,8 @@ public class FogEvent {
 			flag = ((EntityPlayer) entity).capabilities.isCreativeMode;
 		}
 		float f1 = e.getFarPlaneDistance();
-		if ((worldclient.getWorldInfo().getTerrainType() != WorldType.FLAT && !worldclient.provider.hasNoSky() && !flag ) || (VoidFog.voidcraft && worldclient.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid())) {
-			double d0 = (double) ((entity.getBrightnessForRender((float) e.getRenderPartialTicks()) & 15728640) >> 20) / 16.0D + ((VoidFog.voidcraft && worldclient.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid()) ? 15 : (entity.lastTickPosY + (entity.posY - entity.lastTickPosY)) * (double) e.getRenderPartialTicks() + 4.0D) / 32.0D;
+		if ((worldclient.getWorldInfo().getTerrainType() != WorldType.FLAT && !worldclient.provider.hasNoSky() && !flag) || (VoidFog.voidcraft && worldclient.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid())) {
+			double d0 = (double) ((entity.getBrightnessForRender((float) e.getRenderPartialTicks()) & 15728640) >> 20) / 16.0D + ((VoidFog.voidcraft && worldclient.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid()) ? 15 : entity.posY + 4.0D) / 32.0D;
 
 			if (d0 < 1.0D) {
 				if (d0 < 0.0D) {
@@ -80,25 +80,25 @@ public class FogEvent {
 					f1 = f2;
 				}
 			}
-		}
 
-		GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_LINEAR);
+			GlStateManager.setFog(GlStateManager.FogMode.LINEAR);
 
-		if (e.getFogMode() < 0) {
-			GL11.glFogf(GL11.GL_FOG_START, 0.0F);
-			GL11.glFogf(GL11.GL_FOG_END, f1);
-		} else {
-			GL11.glFogf(GL11.GL_FOG_START, f1 * 0.75F);
-			GL11.glFogf(GL11.GL_FOG_END, f1);
-		}
+			if (e.getFogMode() < 0) {
+				GlStateManager.setFogStart(0.0F);
+				GlStateManager.setFogEnd(f1);
+			} else {
+				GlStateManager.setFogStart(f1 * 0.75F);
+				GlStateManager.setFogEnd(f1);
+			}
 
-		if (GLContext.getCapabilities().GL_NV_fog_distance) {
-			GL11.glFogi(34138, 34139);
-		}
+			if (GLContext.getCapabilities().GL_NV_fog_distance) {
+				GlStateManager.glFogi(34138, 34139);
+			}
 
-		if (worldclient.provider.doesXZShowFog((int) entity.posX, (int) entity.posZ)) {
-			GL11.glFogf(GL11.GL_FOG_START, f1 * 0.05F);
-			GL11.glFogf(GL11.GL_FOG_END, Math.min(f1, 192.0F) * 0.5F);
+			if (worldclient.provider.doesXZShowFog((int) entity.posX, (int) entity.posZ)) {
+				GlStateManager.setFogStart(f1 * 0.05F);
+				GlStateManager.setFogEnd(Math.min(f1, 192.0F) * 0.5F);
+			}
 		}
 	}
 
@@ -114,7 +114,8 @@ public class FogEvent {
 			}
 
 			d0 *= d0;
-			if((VoidFog.voidcraft && worldclient.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid())) d0 = 0;
+			if ((VoidFog.voidcraft && worldclient.provider.getDimension() == Tamaized.Voidcraft.VoidCraft.config.getDimensionIdVoid()))
+				d0 = 0;
 			e.setRed((float) ((double) e.getRed() * d0));
 			e.setGreen((float) ((double) e.getGreen() * d0));
 			e.setBlue((float) ((double) e.getBlue() * d0));
