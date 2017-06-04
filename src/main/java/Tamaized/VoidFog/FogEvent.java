@@ -24,7 +24,7 @@ public class FogEvent {
 
 	@SubscribeEvent
 	public void particles(ClientTickEvent e) {
-		if (Minecraft.getMinecraft().isGamePaused())
+		if (!VoidFog.config.isEnabled() || Minecraft.getMinecraft().isGamePaused())
 			return;
 		EntityPlayer player = Minecraft.getMinecraft().player;
 		World world = Minecraft.getMinecraft().world;
@@ -54,6 +54,8 @@ public class FogEvent {
 
 	@SubscribeEvent
 	public void render(RenderFogEvent e) {
+		if (!VoidFog.config.isEnabled())
+			return;
 		Entity entity = e.getEntity();
 		WorldClient worldclient = Minecraft.getMinecraft().world;
 		boolean flag = false;
@@ -104,6 +106,8 @@ public class FogEvent {
 
 	@SubscribeEvent
 	public void color(FogColors e) {
+		if (!VoidFog.config.isEnabled())
+			return;
 		Entity entity = e.getEntity();
 		WorldClient worldclient = Minecraft.getMinecraft().world;
 		double d0 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * e.getRenderPartialTicks() * worldclient.provider.getVoidFogYFactor();
