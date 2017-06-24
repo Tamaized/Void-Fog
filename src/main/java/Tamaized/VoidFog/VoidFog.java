@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-@Mod(modid = VoidFog.modid, name = "VoidFog", version = VoidFog.version, clientSideOnly = true, guiFactory = "Tamaized.VoidFog.config.GUIConfigFactory", acceptedMinecraftVersions = "[1.8,1.12]")
+@Mod(modid = VoidFog.modid, name = "VoidFog", version = VoidFog.version, clientSideOnly = true, acceptedMinecraftVersions = "[1.12,)")
 public class VoidFog {
 
 	public final static String version = "${version}";
