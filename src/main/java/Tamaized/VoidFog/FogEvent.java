@@ -1,5 +1,6 @@
 package Tamaized.VoidFog;
 
+import Tamaized.VoidFog.config.ConfigHandler;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -24,7 +25,7 @@ public class FogEvent {
 
 	@SubscribeEvent
 	public void particles(ClientTickEvent e) {
-		if (!VoidFog.config.isEnabled() || Minecraft.getMinecraft().isGamePaused())
+		if (!ConfigHandler.enabled || Minecraft.getMinecraft().isGamePaused())
 			return;
 		EntityPlayer player = Minecraft.getMinecraft().player;
 		World world = Minecraft.getMinecraft().world;
@@ -54,7 +55,7 @@ public class FogEvent {
 
 	@SubscribeEvent
 	public void render(RenderFogEvent e) {
-		if (!VoidFog.config.isEnabled())
+		if (!ConfigHandler.enabled)
 			return;
 		Entity entity = e.getEntity();
 		WorldClient worldclient = Minecraft.getMinecraft().world;
@@ -106,7 +107,7 @@ public class FogEvent {
 
 	@SubscribeEvent
 	public void color(FogColors e) {
-		if (!VoidFog.config.isEnabled())
+		if (!ConfigHandler.enabled)
 			return;
 		Entity entity = e.getEntity();
 		WorldClient worldclient = Minecraft.getMinecraft().world;

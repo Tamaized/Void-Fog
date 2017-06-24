@@ -24,7 +24,6 @@ public class VoidFog {
 	@Instance(modid)
 	public static VoidFog instance = new VoidFog();
 	public Logger logger;
-	public static ConfigHandler config;
 
 	public static String getVersion() {
 		return version;
@@ -33,8 +32,6 @@ public class VoidFog {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		logger = LogManager.getLogger(modid);
-		File file = event.getSuggestedConfigurationFile();
-		config = new ConfigHandler(this, file, new Configuration(file));
 		if (Loader.isModLoaded("voidcraft")) {
 			logger.info("VoidCraft Detected.");
 			voidcraft = true;
