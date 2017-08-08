@@ -29,7 +29,7 @@ public class FogEvent {
 			return;
 		EntityPlayer player = Minecraft.getMinecraft().player;
 		World world = Minecraft.getMinecraft().world;
-		if (player != null && world != null) {
+		if (player != null && world != null && (!ConfigHandler.creative || (!player.isCreative() && !player.isSpectator()))) {
 			int x = MathHelper.floor(player.posX);
 			int y = MathHelper.floor(player.posY);
 			int z = MathHelper.floor(player.posZ);
@@ -59,12 +59,10 @@ public class FogEvent {
 			return;
 		Entity entity = e.getEntity();
 		WorldClient worldclient = Minecraft.getMinecraft().world;
-		boolean flag = false;
-		if (entity instanceof EntityPlayer) {
-			flag = ((EntityPlayer) entity).capabilities.isCreativeMode;
-		}
+		if (ConfigHandler.creative && entity instanceof EntityPlayer && (((EntityPlayer) entity).isCreative() || ((EntityPlayer) entity).isSpectator()))
+			return;
 		float f1 = e.getFarPlaneDistance();
-		if ((worldclient.getWorldInfo().getTerrainType() != WorldType.FLAT && !worldclient.provider.isNether() && !flag) || (VoidFog.voidcraft && worldclient.provider.getDimension() == tamaized.voidcraft.common.handlers.ConfigHandler.dimensionIdVoid)) {
+		if ((worldclient.getWorldInfo().getTerrainType() != WorldType.FLAT && !worldclient.provider.isNether()) || (VoidFog.voidcraft && worldclient.provider.getDimension() == tamaized.voidcraft.common.handlers.ConfigHandler.dimensionIdVoid)) {
 			double d0 = (double) ((entity.getBrightnessForRender() & 15728640) >> 20) / 16.0D + (((VoidFog.voidcraft && (worldclient.provider.getDimension() == tamaized.voidcraft.common.handlers.ConfigHandler.dimensionIdVoid)) ? 15 : (entity.posY + 4.0D)) / 32.0D);
 
 			if (d0 < 1.0D) {
@@ -111,6 +109,8 @@ public class FogEvent {
 			return;
 		Entity entity = e.getEntity();
 		WorldClient worldclient = Minecraft.getMinecraft().world;
+		if (ConfigHandler.creative && entity instanceof EntityPlayer && (((EntityPlayer) entity).isCreative() || ((EntityPlayer) entity).isSpectator()))
+			return;
 		double d0 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * e.getRenderPartialTicks() * worldclient.provider.getVoidFogYFactor();
 
 		if (d0 < 1.0D) {

@@ -14,6 +14,9 @@ public class ConfigHandler {
 	@Config.Comment("Enable")
 	public static boolean enabled = true;
 
+	@Config.Comment("Disable Fog while in Creative or Spectator mode")
+	public static boolean creative = true;
+
 	@SubscribeEvent
 	public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
 		if (event.getModID().equals(VoidFog.modid)) {
