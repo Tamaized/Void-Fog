@@ -16,6 +16,8 @@ public class ConfigHandler {
 	protected Configuration config;
 	private boolean enabled = true;
 	private boolean default_enabled = true;
+	private boolean creative = true;
+	private boolean default_creative = true;
 
 	public ConfigHandler(VoidFog instance, File file, Configuration c) {
 		mod = instance;
@@ -50,7 +52,7 @@ public class ConfigHandler {
 
 	@SubscribeEvent
 	public void configChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-		if (event.getModID().equals(mod.modid))
+		if (event.getModID().equals(VoidFog.modid))
 			sync(false);
 	}
 
@@ -61,13 +63,19 @@ public class ConfigHandler {
 
 	protected void loadData(boolean firstLoad) {
 		enabled = this.config.get(Configuration.CATEGORY_GENERAL, "enabled", default_enabled).getBoolean();
+		creative = this.config.get(Configuration.CATEGORY_GENERAL, "creative", default_creative).getBoolean();
 	}
 
 	protected void cleanup() throws IOException {
 		config.get(Configuration.CATEGORY_GENERAL, "enabled", default_enabled).set(enabled);
+		config.get(Configuration.CATEGORY_GENERAL, "creative", default_creative).set(creative);
 	}
 
 	public boolean isEnabled() {
 		return enabled;
+	}
+
+	public boolean isCreative() {
+		return creative;
 	}
 }
