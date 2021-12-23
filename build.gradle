@@ -23,7 +23,7 @@ version = "${artifactor_minecraft_version}-${artifactor_mod_version}." + (hasPro
 group = "tamaized.voidfog"
 archivesBaseName = "VoidFog"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 minecraft {
     mappings("${project.mapping_type}", "${project.mapping_version}")
