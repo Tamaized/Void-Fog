@@ -12,7 +12,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkConstants;
+import net.minecraftforge.fmllegacy.network.FMLNetworkConstants;
 
 import java.util.Random;
 import java.util.function.Consumer;
@@ -27,20 +27,20 @@ public class TheFuckingMod {
 
 	public TheFuckingMod() {
 		ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()->new IExtensionPoint.
-				DisplayTest(()-> NetworkConstants.IGNORESERVERONLY, (remote, isServer)-> true));
+				DisplayTest(()-> FMLNetworkConstants.IGNORESERVERONLY, (remote, isServer)-> true));
 		IEventBus busForge = MinecraftForge.EVENT_BUS;
 		busForge.addListener((Consumer<EntityViewRenderEvent.RenderFogEvent>) event -> {
 			if (active || fog < 1F) {
 				float f = 3F;
 				f = f >= event.getFarPlaneDistance() ? event.getFarPlaneDistance() : Mth.clampedLerp(f, event.getFarPlaneDistance(), fog);
-				float shift = (float) ((active ? (fog > 0.25F ? 0.1F : 0.0005F) : (fog > 0.25F ? 0.001F : 0.0001F)) * event.getPartialTicks());
+				float shift = (float) ((active ? (fog > 0.25F ? 0.1F : 0.0005F) : (fog > 0.25F ? 0.001F : 0.0001F)) * event.getRenderPartialTicks());
 				if (active)
 					fog -= shift;
 				else
 					fog += shift;
 				fog = Mth.clamp(fog, 0F, 1F);
 
-				if (event.getMode() == FogRenderer.FogMode.FOG_SKY) {
+				if (event.getType() == FogRenderer.FogMode.FOG_SKY) {
 					RenderSystem.setShaderFogStart(0.0F);
 					RenderSystem.setShaderFogEnd(f);
 				} else {
@@ -57,7 +57,7 @@ public class TheFuckingMod {
 					final float c = 0;
 					colors[i] = real == c ? c : Mth.clampedLerp(real, c, color);
 				}
-				float shift = (float) (0.1F * event.getPartialTicks());
+				float shift = (float) (0.1F * event.getRenderPartialTicks());
 				if (active)
 					color += shift;
 				else
