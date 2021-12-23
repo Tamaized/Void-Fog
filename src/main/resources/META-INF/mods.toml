@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[39,)"
+loaderVersion="[30,)"
 issueTrackerURL="https://github.com/Tamaized/Void-Fog/issues"
 license="All Rights Reserved"
 [[mods]]
@@ -11,10 +11,3 @@ authors="Tamaized"
 description='''
 
 '''
-
-[[dependencies.voidscape]]
-    modId="forge"
-    mandatory=true
-    versionRange="[39.0.0,)"
-    ordering="NONE"
-    side="BOTH"
