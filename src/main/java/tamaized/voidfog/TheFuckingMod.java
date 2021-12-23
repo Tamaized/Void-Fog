@@ -33,7 +33,7 @@ public class TheFuckingMod {
 			if (active || fog < 1F) {
 				float f = 3F;
 				f = f >= event.getFarPlaneDistance() ? event.getFarPlaneDistance() : Mth.clampedLerp(f, event.getFarPlaneDistance(), fog);
-				float shift = (float) ((active ? (fog > 0.25F ? 0.01F : 0.0005F) : (fog > 0.25F ? 0.001F : 0.0001F)) * event.getPartialTicks());
+				float shift = (float) ((active ? (fog > 0.25F ? 0.1F : 0.0005F) : (fog > 0.25F ? 0.001F : 0.0001F)) * event.getPartialTicks());
 				if (active)
 					fog -= shift;
 				else
@@ -47,7 +47,6 @@ public class TheFuckingMod {
 					RenderSystem.setShaderFogStart(f * 0.75F);
 					RenderSystem.setShaderFogEnd(f);
 				}
-
 			}
 		});
 		busForge.addListener((Consumer<EntityViewRenderEvent.FogColors>) event -> {
