@@ -1,59 +1,99 @@
 buildscript {
     repositories {
+        maven { url = 'https://maven.minecraftforge.net/' }
         jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
+        mavenCentral()
+        mavenLocal()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1+', changing: true
     }
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
 repositories {
-	maven {
-		url = "http://dvs1.progwml6.com/files/maven"
-	}
+    maven {
+        url = "https://dvs1.progwml6.com/files/maven/" // JEI
+    }
 }
 
-version = "${modVersion}${modVersionValue}"
-group= "tamaized.voidfog"
+version = "${artifactor_minecraft_version}-${artifactor_mod_version}." + (hasProperty("CIVersion") ? CIVersion : mod_version)
+group = "tamaized.voidfog"
+archivesBaseName = "VoidFog"
 
-sourceCompatibility = targetCompatibility = '1.8'
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-    version = "${project.minecraftVersion}-${project.forgeVersion}"
-    runDir = "run"
-    mappings = "${project.forgeMapping}"
-    makeObfSourceJar = false
-	useDepAts = true
-	replaceIn 'VoidFog.java'
-	replace '${version}', "${modVersion}${modVersionValue}"
-}
+    mappings("${project.mapping_type}", "${project.mapping_version}")
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
-dependencies {
-	deobfCompile "mezz.jei:${project.jeiVersion}:api"
-	runtime "mezz.jei:${project.jeiVersion}"
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                voidscape {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                voidscape {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
 processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraftVersion
-
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-		expand([
-			'version'		: project.modVersion+""+project.modVersionValue,
-			'mcversion'		: project.minecraftVersion
+    filesMatching("META-INF/mods.toml") {
+        expand([
+                'version': "${project.version}"
         ])
     }
-        
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+}
+
+jar {
+    manifest {
+        attributes(["Specification-Title"     : "VoidFog",
+                    "Specification-Vendor"    : "Tamaized",
+                    "Specification-Version"   : "${version}",
+                    "Implementation-Title"    : project.name,
+                    "Implementation-Version"  : "${version}",
+                    "Implementation-Vendor"   : "Tamaized",
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
     }
 }
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${project.artifactor_minecraft_version}-${project.artifactor_forge_version}"
+
+    runtimeOnly fg.deobf("mezz.jei:${project.jei_version}")
+}
+
+task incrBuildNum doLast {
+    ant.propertyfile(file: "gradle.properties") {
+        entry(key: "mod_version", value: Integer.parseInt(project.mod_version) + 1)
+    }
+}
+
+build.finalizedBy(incrBuildNum)

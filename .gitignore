@@ -1,7 +1,9 @@
 *
-!.gitignore
+!donator.properties
 !gradlew
 !gradlew.bat
+!/contributors/
+!/contributors/**
 !/gradle
 !/gradle/**
 !/src/
