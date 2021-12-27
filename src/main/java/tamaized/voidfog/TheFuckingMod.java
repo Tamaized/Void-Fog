@@ -6,13 +6,16 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fmllegacy.network.FMLNetworkConstants;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Random;
 import java.util.function.Consumer;
@@ -25,10 +28,27 @@ public class TheFuckingMod {
 	static float color = 0F;
 	static float fog = 1F;
 
+	static class Config {
+
+		static Config INSTANCE;
+		ForgeConfigSpec.IntValue y;
+
+		public Config(ForgeConfigSpec.Builder builder) {
+			y = builder.
+					translation("voidfog.config.y").
+					comment("The Y value in which void fog takes effect. (Min World Height + Y Value)").
+					defineInRange("y", 12, 0, Integer.MAX_VALUE);
+		}
+
+	}
+
 	public TheFuckingMod() {
 		ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()->new IExtensionPoint.
 				DisplayTest(()-> FMLNetworkConstants.IGNORESERVERONLY, (remote, isServer)-> true));
 		IEventBus busForge = MinecraftForge.EVENT_BUS;
+		final Pair<Config, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Config::new);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, specPair.getRight());
+		Config.INSTANCE = specPair.getLeft();
 		busForge.addListener((Consumer<EntityViewRenderEvent.RenderFogEvent>) event -> {
 			if (active || fog < 1F) {
 				float f = 3F;
@@ -69,7 +89,7 @@ public class TheFuckingMod {
 			}
 		});
 		busForge.addListener((Consumer<TickEvent.PlayerTickEvent>) event -> {
-			if(event.player.level != null && event.player.getY() <= event.player.level.getMinBuildHeight() + 12) {
+			if(event.player.level != null && event.player.getY() <= event.player.level.getMinBuildHeight() + Config.INSTANCE.y.get()) {
 				active = true;
 				Random random = event.player.getRandom();
 				for (int i = 0; i < 15; i++) {
