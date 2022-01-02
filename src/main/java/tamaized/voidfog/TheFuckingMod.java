@@ -36,12 +36,17 @@ public class TheFuckingMod {
 
 		static Config INSTANCE;
 		ForgeConfigSpec.IntValue y;
+		ForgeConfigSpec.BooleanValue voidscape;
 
 		public Config(ForgeConfigSpec.Builder builder) {
 			y = builder.
 					translation("voidfog.config.y").
 					comment("The Y value in which void fog takes effect. (Min World Height + Y Value)").
 					defineInRange("y", 12, 0, Integer.MAX_VALUE);
+			voidscape = builder.
+					translation("voidfog.config.voidscape").
+					comment("Enable the effect everywhere in the mod Voidscape's main Dimension.").
+					define("voidscape", true);
 		}
 
 	}
@@ -109,7 +114,7 @@ public class TheFuckingMod {
 	public static final ResourceKey<Level> WORLD_KEY_VOID = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("voidscape", "void"));
 
 	public static boolean checkForVoidscapeDimension(Level world) {
-		return world.dimension().location().equals(WORLD_KEY_VOID.location());
+		return Config.INSTANCE.voidscape.get() && world.dimension().location().equals(WORLD_KEY_VOID.location());
 	}
 
 }
