@@ -2,8 +2,12 @@ package tamaized.voidfog;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -89,7 +93,7 @@ public class TheFuckingMod {
 			}
 		});
 		busForge.addListener((Consumer<TickEvent.PlayerTickEvent>) event -> {
-			if(event.player.level != null && event.player.getY() <= event.player.level.getMinBuildHeight() + Config.INSTANCE.y.get()) {
+			if(event.player.level != null && (event.player.getY() <= event.player.level.getMinBuildHeight() + Config.INSTANCE.y.get() || checkForVoidscapeDimension(event.player.level))) {
 				active = true;
 				Random random = event.player.getRandom();
 				for (int i = 0; i < 15; i++) {
@@ -100,6 +104,12 @@ public class TheFuckingMod {
 			} else
 				active = false;
 		});
+	}
+
+	public static final ResourceKey<Level> WORLD_KEY_VOID = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("voidscape", "void"));
+
+	public static boolean checkForVoidscapeDimension(Level world) {
+		return world.dimension().location().equals(WORLD_KEY_VOID.location());
 	}
 
 }
