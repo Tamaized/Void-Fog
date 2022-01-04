@@ -1,6 +1,7 @@
 package tamaized.voidfog;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
@@ -98,7 +99,7 @@ public class TheFuckingMod {
 			}
 		});
 		busForge.addListener((Consumer<TickEvent.PlayerTickEvent>) event -> {
-			if(event.player.level != null && (event.player.getY() <= event.player.level.getMinBuildHeight() + Config.INSTANCE.y.get() || checkForVoidscapeDimension(event.player.level))) {
+			if(event.player == Minecraft.getInstance().player && event.player.level != null && (event.player.getY() <= event.player.level.getMinBuildHeight() + Config.INSTANCE.y.get() || checkForVoidscapeDimension(event.player.level))) {
 				active = true;
 				Random random = event.player.getRandom();
 				for (int i = 0; i < 15; i++) {
