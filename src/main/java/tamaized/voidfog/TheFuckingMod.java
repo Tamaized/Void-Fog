@@ -99,7 +99,9 @@ public class TheFuckingMod {
 			}
 		});
 		busForge.addListener((Consumer<TickEvent.PlayerTickEvent>) event -> {
-			if(event.player == Minecraft.getInstance().player && event.player.level != null && (event.player.getY() <= event.player.level.getMinBuildHeight() + Config.INSTANCE.y.get() || checkForVoidscapeDimension(event.player.level))) {
+			if (event.player != Minecraft.getInstance().player)
+				return;
+			if (event.player.level != null && (event.player.getY() <= event.player.level.getMinBuildHeight() + Config.INSTANCE.y.get() || checkForVoidscapeDimension(event.player.level))) {
 				active = true;
 				Random random = event.player.getRandom();
 				for (int i = 0; i < 15; i++) {
