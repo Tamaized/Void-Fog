@@ -3,23 +3,23 @@ package tamaized.voidfog;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.core.Registry;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.network.NetworkConstants;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Random;
@@ -53,8 +53,7 @@ public class TheFuckingMod {
 	}
 
 	public TheFuckingMod() {
-		ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()->new IExtensionPoint.
-				DisplayTest(()-> NetworkConstants.IGNORESERVERONLY, (remote, isServer)-> true));
+		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, ()->Pair.of(()-> FMLNetworkConstants.IGNORESERVERONLY, (remote, isServer)-> true));
 		IEventBus busForge = MinecraftForge.EVENT_BUS;
 		final Pair<Config, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Config::new);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, specPair.getRight());
@@ -62,20 +61,20 @@ public class TheFuckingMod {
 		busForge.addListener((Consumer<EntityViewRenderEvent.RenderFogEvent>) event -> {
 			if (active || fog < 1F) {
 				float f = 3F;
-				f = f >= event.getFarPlaneDistance() ? event.getFarPlaneDistance() : Mth.clampedLerp(f, event.getFarPlaneDistance(), fog);
-				float shift = (float) ((active ? (fog > 0.25F ? 0.1F : 0.0005F) : (fog > 0.25F ? 0.001F : 0.0001F)) * event.getPartialTicks());
+				f = f >= event.getFarPlaneDistance() ? event.getFarPlaneDistance() : (float) MathHelper.clampedLerp(f, event.getFarPlaneDistance(), fog);
+				float shift = (float) ((active ? (fog > 0.25F ? 0.1F : 0.0005F) : (fog > 0.25F ? 0.001F : 0.0001F)) * event.getRenderPartialTicks());
 				if (active)
 					fog -= shift;
 				else
 					fog += shift;
-				fog = Mth.clamp(fog, 0F, 1F);
+				fog = MathHelper.clamp(fog, 0F, 1F);
 
-				if (event.getMode() == FogRenderer.FogMode.FOG_SKY) {
-					RenderSystem.setShaderFogStart(0.0F);
-					RenderSystem.setShaderFogEnd(f);
+				if (event.getType() == FogRenderer.FogType.FOG_SKY) {
+					RenderSystem.fogStart(0.0F);
+					RenderSystem.fogEnd(f);
 				} else {
-					RenderSystem.setShaderFogStart(f * 0.75F);
-					RenderSystem.setShaderFogEnd(f);
+					RenderSystem.fogStart(f * 0.75F);
+					RenderSystem.fogEnd(f);
 				}
 			}
 		});
@@ -85,14 +84,14 @@ public class TheFuckingMod {
 				for (int i = 0; i < 3; i++) {
 					final float real = realColors[i];
 					final float c = 0;
-					colors[i] = real == c ? c : Mth.clampedLerp(real, c, color);
+					colors[i] = real == c ? c : (float) MathHelper.clampedLerp(real, c, color);
 				}
-				float shift = (float) (0.1F * event.getPartialTicks());
+				float shift = (float) (0.1F * event.getRenderPartialTicks());
 				if (active)
 					color += shift;
 				else
 					color -= shift;
-				color = Mth.clamp(color, 0F, 1F);
+				color = MathHelper.clamp(color, 0F, 1F);
 				event.setRed(colors[0]);
 				event.setGreen(colors[1]);
 				event.setBlue(colors[2]);
@@ -101,12 +100,12 @@ public class TheFuckingMod {
 		busForge.addListener((Consumer<TickEvent.PlayerTickEvent>) event -> {
 			if (event.player != Minecraft.getInstance().player)
 				return;
-			if (event.player.level != null && (event.player.getY() <= event.player.level.getMinBuildHeight() + Config.INSTANCE.y.get() || checkForVoidscapeDimension(event.player.level))) {
+			if (event.player.level != null && (event.player.getY() <= Config.INSTANCE.y.get() || checkForVoidscapeDimension(event.player.level))) {
 				active = true;
 				Random random = event.player.getRandom();
 				for (int i = 0; i < 15; i++) {
-					Vec3 vec = event.player.position().add(0, random.nextDouble() * 3D, 0).
-							add(new Vec3(random.nextDouble() * 6D, 0D, 0D).yRot((float) Math.toRadians(random.nextInt(360))));
+					Vector3d vec = event.player.position().add(0, random.nextDouble() * 3D, 0).
+							add(new Vector3d(random.nextDouble() * 6D, 0D, 0D).yRot((float) Math.toRadians(random.nextInt(360))));
 					event.player.level.addParticle(ParticleTypes.ASH, vec.x, vec.y, vec.z, 0, 0, 0);
 				}
 			} else
@@ -114,9 +113,9 @@ public class TheFuckingMod {
 		});
 	}
 
-	public static final ResourceKey<Level> WORLD_KEY_VOID = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("voidscape", "void"));
+	public static final RegistryKey<World> WORLD_KEY_VOID = RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("voidscape", "void"));
 
-	public static boolean checkForVoidscapeDimension(Level world) {
+	public static boolean checkForVoidscapeDimension(World world) {
 		return Config.INSTANCE.voidscape.get() && world.dimension().location().equals(WORLD_KEY_VOID.location());
 	}
 
