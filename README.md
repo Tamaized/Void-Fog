@@ -19,6 +19,6 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly fg.deobf("tamaized:voidfog:{version}")
+    implementation fg.deobf("tamaized:voidfog:{version}")
 }
 ```
