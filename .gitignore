@@ -1,4 +1,5 @@
 *
+!.gitignore
 !donator.properties
 !gradlew
 !gradlew.bat
@@ -13,5 +14,6 @@
 !build.gradle
 !gradle.properties
 !discord.properties
+!maven.properties
 !LICENSE
 !README.md
