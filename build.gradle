@@ -120,7 +120,7 @@ publishing {
                 artifact project.sourceJar
             }
             setGroupId 'tamaized'
-            setArtifactId 'voidscape'
+            setArtifactId 'voidfog'
         }
     }
     repositories {
