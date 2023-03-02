@@ -3,8 +3,8 @@ package tamaized.voidfog;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -16,17 +16,15 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.network.NetworkConstants;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.function.Consumer;
 
 @Mod("voidfog")
-public class TheFuckingMod {
+public class VoidFog {
 
 	static boolean active;
 	static final float[] colors = new float[3];
@@ -52,9 +50,7 @@ public class TheFuckingMod {
 
 	}
 
-	public TheFuckingMod() {
-		ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, ()->new IExtensionPoint.
-				DisplayTest(()-> NetworkConstants.IGNORESERVERONLY, (remote, isServer)-> true));
+	public VoidFog() {
 		IEventBus busForge = MinecraftForge.EVENT_BUS;
 		final Pair<Config, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Config::new);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, specPair.getRight());
@@ -114,7 +110,7 @@ public class TheFuckingMod {
 		});
 	}
 
-	public static final ResourceKey<Level> WORLD_KEY_VOID = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("voidscape", "void"));
+	public static final ResourceKey<Level> WORLD_KEY_VOID = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("voidscape", "void"));
 
 	public static boolean checkForVoidscapeDimension(Level world) {
 		return Config.INSTANCE.voidscape.get() && world.dimension().location().equals(WORLD_KEY_VOID.location());
