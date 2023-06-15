@@ -39,7 +39,6 @@ public class VoidFog {
 		static Config INSTANCE;
 		ForgeConfigSpec.IntValue y;
 		ForgeConfigSpec.DoubleValue distance;
-		ForgeConfigSpec.DoubleValue fade;
 		ForgeConfigSpec.BooleanValue voidscape;
 
 		ForgeConfigSpec.ConfigValue<List<? extends String>> blacklistedDims;
