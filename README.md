@@ -8,7 +8,7 @@ Minecraft mod to bring back the Void Fog
 https://curseforge.com/minecraft/mc-mods/void-fog
 
 ## Latest Development Download
-https://tamaized.com/artifacts/builds/Tamaized/Void-Fog/latest/
+https://artifactor.tamaized.com/repository/Tamaized/Void-Fog/artifact/latest
 
 ## Maven
 ```
