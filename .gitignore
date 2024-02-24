@@ -11,7 +11,8 @@
 !/src/**
 !/libs/
 !/libs/**
-!build.gradle.bk
+!build.gradle
+!settings.gradle
 !gradle.properties
 !discord.properties
 !maven.properties
