@@ -1,94 +1,29 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net/' }
-        jcenter()
-        mavenCentral()
-        mavenLocal()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1+', changing: true
-    }
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev' version '7.0.+'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'io.github.0ffz.github-packages' version '1.+'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 
 repositories {
     maven {
-        url = "https://dvs1.progwml6.com/files/maven/" // JEI
+        name 'JEI'
+        url 'https://maven.blamejared.com/'
     }
 }
 
-version = "${minecraft_version}-${mod_major_version}." + (hasProperty("CIVersion") ? CIVersion : mod_version)
+version = "${project.minecraft_version}-${project.mod_major_version}." + (hasProperty("CIVersion") ? CIVersion : mod_version)
 group = "tamaized.voidfog"
-archivesBaseName = "VoidFog"
+base {
+    archivesName = "VoidFog"
+}
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-minecraft {
-    mappings("${project.mapping_type}", "${project.mapping_version}")
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                voidscape {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                voidscape {
-                    source sourceSets.main
-                }
-            }
-        }
-    }
-}
-
-processResources {
-    filesMatching("META-INF/mods.toml") {
-        expand([
-                'version': "${project.version}"
-        ])
-    }
-}
-
-jar {
-    manifest {
-        attributes(["Specification-Title"     : "VoidFog",
-                    "Specification-Vendor"    : "Tamaized",
-                    "Specification-Version"   : "${version}",
-                    "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : "${version}",
-                    "Implementation-Vendor"   : "Tamaized",
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
-    }
-}
-
-dependencies {
-    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
-
-    //runtimeOnly fg.deobf("mezz.jei:${project.jei_version}")
-}
+minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
+compileJava.options.compilerArgs << "-Xlint:all,-classfile,-processing,-deprecation" << "-Werror"
 
 def secrets = new Properties()
 def secretsFile = file('secrets.properties')
@@ -107,7 +42,76 @@ if (secretsFile.exists()) {
     }
 }
 
-jar.finalizedBy('reobfJar')
+def mod_id = 'voidfog'
+runs {
+    configureEach {
+        workingDirectory project.file('run')
+        systemProperty 'forge.logging.console.level', 'debug'
+        systemProperty 'fml.earlyprogresswindow', 'false'
+        systemProperty 'mixin.env.disableRefMap', 'true'
+
+        modSource project.sourceSets.main
+    }
+
+    client {
+//        taskName "Minecraft_Client_${project.minecraft_version}"
+        systemProperty 'forge.enabledGameTestNamespaces', mod_id
+        programArguments.addAll '--username', secrets.getProperty("username")?: 'Dev', secrets.getProperty("uuid") ? '--uuid' : '', secrets.getProperty("uuid")?: ''
+    }
+
+    server {
+//        taskName "Minecraft_Server_${project.minecraft_version}"
+        systemProperty 'forge.enabledGameTestNamespaces', mod_id
+        programArgument '--nogui'
+    }
+
+    gameTestServer {
+//        taskName "Minecraft_GameTestServer_${project.minecraft_version}"
+        systemProperty 'forge.enabledGameTestNamespaces', mod_id
+    }
+
+    data {
+//        taskName "Minecraft_Data_${project.minecraft_version}"
+        workingDirectory project.file('run-data')
+        programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+subsystems {
+    parchment {
+        minecraftVersion = "1.20.3" //parchment doesnt support 1.20.4 yet
+        mappingsVersion = project.parchment_version
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+processResources {
+    filesMatching("META-INF/mods.toml") {
+        expand([
+                'file': ['jarVersion': "${project.version}"]
+        ])
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    //noinspection GroovyAssignabilityCheck
+    manifest {
+        attributes(["Specification-Title"     : "VoidFog",
+                    "Specification-Vendor"    : "Tamaized",
+                    "Specification-Version"   : "${version}",
+                    "Implementation-Title"    : project.name,
+                    "Implementation-Version"  : "${version}",
+                    "Implementation-Vendor"   : "Tamaized",
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
+    }
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${project.neoforge_version}"
+
+    runtimeOnly "mezz.jei:${project.jei_version}"
+}
 
 def mavenUser = hasProperty("CIMUser") ? CIMUser : secrets.getProperty("maven_username")
 def mavenToken = hasProperty("CIMToken") ? CIMToken : secrets.getProperty("maven_password")
@@ -116,7 +120,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             afterEvaluate {
-                artifact project.jar
+                artifact project.shadowJar
                 artifact project.sourceJar
             }
             setGroupId 'tamaized'
@@ -134,9 +138,14 @@ publishing {
     }
 }
 
-task sourceJar(type: Jar, dependsOn: 'classes') {
+tasks.register('sourceJar', Jar) {
+    dependsOn 'classes'
     from sourceSets.main.allSource
-    classifier = 'sources'
+    archiveClassifier = 'sources'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 task incrBuildNum doLast {

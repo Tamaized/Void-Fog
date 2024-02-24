@@ -12,14 +12,14 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -37,14 +37,14 @@ public class VoidFog {
 	static class Config {
 
 		static Config INSTANCE;
-		ForgeConfigSpec.IntValue y;
-		ForgeConfigSpec.DoubleValue distance;
-		ForgeConfigSpec.BooleanValue voidscape;
+		ModConfigSpec.IntValue y;
+		ModConfigSpec.DoubleValue distance;
+		ModConfigSpec.BooleanValue voidscape;
 
-		ForgeConfigSpec.ConfigValue<List<? extends String>> blacklistedDims;
-		ForgeConfigSpec.BooleanValue whitelistToggle;
+		ModConfigSpec.ConfigValue<List<? extends String>> blacklistedDims;
+		ModConfigSpec.BooleanValue whitelistToggle;
 
-		public Config(ForgeConfigSpec.Builder builder) {
+		public Config(ModConfigSpec.Builder builder) {
 			y = builder.
 					translation("voidfog.config.y").
 					comment("The Y value in which void fog takes effect. (Min World Height + Y Value)").
@@ -69,8 +69,8 @@ public class VoidFog {
 	}
 
 	public VoidFog() {
-		IEventBus busForge = MinecraftForge.EVENT_BUS;
-		final Pair<Config, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Config::new);
+		IEventBus busForge = NeoForge.EVENT_BUS;
+		final Pair<Config, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(Config::new);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, specPair.getRight());
 		Config.INSTANCE = specPair.getLeft();
 		busForge.addListener((Consumer<ViewportEvent.RenderFog>) event -> {

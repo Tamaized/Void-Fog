@@ -1,21 +1,22 @@
 modLoader="javafml"
-loaderVersion="[46,)"
+loaderVersion="[1,)"
 issueTrackerURL="https://github.com/Tamaized/Void-Fog/issues"
 license="All Rights Reserved"
-[[mods]]
-modId="voidfog"
-version="${version}"
-displayName="VoidFog"
-credits=""
-authors="Tamaized"
-description='''
-displayTest="IGNORE_ALL_VERSION"
 
-'''
+[[mods]]
+    modId="voidfog"
+    version="${file.jarVersion}"
+    displayName="VoidFog"
+    credits=""
+    authors="Tamaized"
+    displayTest="IGNORE_ALL_VERSION"
+    description='''
+
+    '''
 
 [[dependencies.voidfog]]
-    modId="forge"
-    mandatory=true
-    versionRange="[46,)"
+    modId="neoforge"
+    type="required"
+    versionRange="[20,)"
     ordering="NONE"
     side="BOTH"
