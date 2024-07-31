@@ -17,6 +17,6 @@ license="All Rights Reserved"
 [[dependencies.voidfog]]
     modId="neoforge"
     type="required"
-    versionRange="[20,)"
+    versionRange="[21,)"
     ordering="NONE"
     side="BOTH"

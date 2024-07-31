@@ -19,7 +19,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class VoidFog {
 			blacklistedDims = builder.
 					translation("voidfog.config.blacklisted_dims").
 					comment("Defines which dimensions shouldnt render any void fog. Each entry should be a valid dimension id. For example, to blacklist void fog from appearing in Twilight Forest, add \"twilightforest:twilight_forest\" to this list.").
-					defineList("dimension_blacklist", new ArrayList<>(), s -> s instanceof String string && ResourceLocation.isValidResourceLocation(string));
+					defineListAllowEmpty("dimension_blacklist", new ArrayList<>(), () -> "", s -> s instanceof String string && ResourceLocation.tryParse(string) != null);
 			whitelistToggle = builder.
 					translation("voidfog.config.whitelist_toggle").
 					comment("Defines whether the dimension blacklist should function as a whitelist instead, meaning that only dimensions in that config option will render void fog.").
@@ -71,7 +71,7 @@ public class VoidFog {
 	public VoidFog() {
 		IEventBus busForge = NeoForge.EVENT_BUS;
 		final Pair<Config, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(Config::new);
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, specPair.getRight());
+		ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.CLIENT, specPair.getRight());
 		Config.INSTANCE = specPair.getLeft();
 		busForge.addListener((Consumer<ViewportEvent.RenderFog>) event -> {
 			if (active || fog < 1F) {
@@ -106,21 +106,21 @@ public class VoidFog {
 				event.setBlue(colors[2]);
 			}
 		});
-		busForge.addListener((Consumer<TickEvent.PlayerTickEvent>) event -> {
-			if (event.player != Minecraft.getInstance().player)
+		busForge.addListener((Consumer<PlayerTickEvent.Pre>) event -> {
+			if (event.getEntity() != Minecraft.getInstance().player)
 				return;
 
-			if ((event.player.level() != null && (event.player.getY() <= event.player.level().getMinBuildHeight() + Config.INSTANCE.y.get() && Config.INSTANCE.whitelistToggle.get() == Config.INSTANCE.blacklistedDims.get().contains(event.player.level().dimension().location().toString())) || checkForVoidscapeDimension(event.player.level()))) {
-				active = !event.player.hasEffect(MobEffects.NIGHT_VISION);
-				RandomSource random = event.player.getRandom();
+			if ((event.getEntity().level() != null && (event.getEntity().getY() <= event.getEntity().level().getMinBuildHeight() + Config.INSTANCE.y.get() && Config.INSTANCE.whitelistToggle.get() == Config.INSTANCE.blacklistedDims.get().contains(event.getEntity().level().dimension().location().toString())) || checkForVoidscapeDimension(event.getEntity().level()))) {
+				active = !event.getEntity().hasEffect(MobEffects.NIGHT_VISION);
+				RandomSource random = event.getEntity().getRandom();
 				for (int l = 0; l < 100; ++l) {
-					int i1 = event.player.blockPosition().getX() + random.nextInt(16) - random.nextInt(16);
-					int j1 =  event.player.blockPosition().getY() + random.nextInt(16) - random.nextInt(16);
-					int k1 =  event.player.blockPosition().getZ() + random.nextInt(16) - random.nextInt(16);
-					BlockState block = event.player.level().getBlockState(new BlockPos(i1, j1, k1));
+					int i1 = event.getEntity().blockPosition().getX() + random.nextInt(16) - random.nextInt(16);
+					int j1 =  event.getEntity().blockPosition().getY() + random.nextInt(16) - random.nextInt(16);
+					int k1 =  event.getEntity().blockPosition().getZ() + random.nextInt(16) - random.nextInt(16);
+					BlockState block = event.getEntity().level().getBlockState(new BlockPos(i1, j1, k1));
 
 					if (block.isAir() && random.nextInt(Config.INSTANCE.y.get()) > j1) {
-						event.player.level().addParticle(ParticleTypes.ASH, i1 + random.nextFloat(), j1 + random.nextFloat(), k1 + random.nextFloat(), 0.0D, 0.0D, 0.0D);
+						event.getEntity().level().addParticle(ParticleTypes.ASH, i1 + random.nextFloat(), j1 + random.nextFloat(), k1 + random.nextFloat(), 0.0D, 0.0D, 0.0D);
 					}
 				}
 			} else
@@ -128,7 +128,7 @@ public class VoidFog {
 		});
 	}
 
-	public static final ResourceKey<Level> WORLD_KEY_VOID = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("voidscape", "void"));
+	public static final ResourceKey<Level> WORLD_KEY_VOID = ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath("voidscape", "void"));
 
 	public static boolean checkForVoidscapeDimension(Level world) {
 		return Config.INSTANCE.voidscape.get() && world.dimension().location().equals(WORLD_KEY_VOID.location());
