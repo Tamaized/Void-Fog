@@ -99,7 +99,7 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly "mezz.jei:jei-${project.minecraft_version}-neoforge:${project.jei_version}"
+    runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
 
     testImplementation group: 'net.neoforged', name: 'testframework', version: project.neoforge_version
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.10.3'
