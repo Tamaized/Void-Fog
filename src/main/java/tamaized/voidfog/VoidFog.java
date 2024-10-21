@@ -21,6 +21,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.apache.commons.lang3.tuple.Pair;
+import tamaized.beanification.BeanContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,10 @@ import java.util.function.Consumer;
 public class VoidFog {
 
 	public static final String MODID = "voidfog";
+
+	static {
+		BeanContext.init();
+	}
 
 	static boolean active;
 	static final float[] colors = new float[3];
@@ -71,6 +76,7 @@ public class VoidFog {
 	}
 
 	public VoidFog() {
+		BeanContext.enableMainModClassInjections(this);
 		IEventBus busForge = NeoForge.EVENT_BUS;
 		final Pair<Config, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(Config::new);
 		ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.CLIENT, specPair.getRight());
