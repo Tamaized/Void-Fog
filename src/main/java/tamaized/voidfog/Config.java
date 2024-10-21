@@ -3,6 +3,8 @@ package tamaized.voidfog;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import tamaized.beanification.Component;
 import tamaized.beanification.PostConstruct;
@@ -15,6 +17,7 @@ public class Config {
 
 	ModConfigSpec.IntValue y;
 	ModConfigSpec.DoubleValue distance;
+	ModConfigSpec.IntValue particleDensity;
 	ModConfigSpec.BooleanValue voidscape;
 
 	ModConfigSpec.ConfigValue<List<? extends String>> blacklistedDims;
@@ -24,6 +27,7 @@ public class Config {
 	private void postConstruct() {
 		ModConfigSpec spec = new ModConfigSpec.Builder().configure(this::setup).getRight();
 		ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.CLIENT, spec);
+		ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class, () -> ConfigurationScreen::new);
 	}
 
 	private Config setup(ModConfigSpec.Builder builder) {
@@ -35,6 +39,10 @@ public class Config {
 				translation("voidfog.config.distance").
 				comment("Defines how far away the fog should be from your player. Higher numbers mean further away.").
 				defineInRange("distance", 30, 0, Double.MAX_VALUE);
+		particleDensity = builder.
+				translation("voidfog.config.particle_density").
+				comment("The amount of dust particles to spawn per tick").
+				defineInRange("particle_density", 100, 0, Integer.MAX_VALUE);
 		voidscape = builder.
 				translation("voidfog.config.voidscape").
 				comment("Enable the effect everywhere in the mod Voidscape's main Dimension.").

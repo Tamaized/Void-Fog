@@ -82,7 +82,7 @@ public class EventListeners {
 		) {
 			active = !event.getEntity().hasEffect(MobEffects.NIGHT_VISION);
 			RandomSource random = event.getEntity().getRandom();
-			for (int l = 0; l < 100; ++l) {
+			for (int l = 0; l < config.particleDensity.getAsInt(); ++l) {
 				int i1 = event.getEntity().blockPosition().getX() + random.nextInt(16) - random.nextInt(16);
 				int j1 = event.getEntity().blockPosition().getY() + random.nextInt(16) - random.nextInt(16);
 				int k1 = event.getEntity().blockPosition().getZ() + random.nextInt(16) - random.nextInt(16);

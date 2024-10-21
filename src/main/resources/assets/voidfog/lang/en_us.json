@@ -1,0 +1,8 @@
+{
+  "voidfog.config.y": "Maximum Y Level",
+  "voidfog.config.distance": "Fog Distance",
+  "voidfog.config.particle_density": "Particle Density",
+  "voidfog.config.voidscape": "Voidscape Integration",
+  "voidfog.config.blacklisted_dims": "Dimension Blacklist",
+  "voidfog.config.whitelist_toggle": "Whitelist Mode"
+}
