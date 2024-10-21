@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-@Mod("voidfog")
+@Mod(VoidFog.MODID)
 public class VoidFog {
+
+	public static final String MODID = "voidfog";
 
 	static boolean active;
 	static final float[] colors = new float[3];

@@ -1,3 +1,5 @@
+import org.jetbrains.gradle.ext.JUnit
+
 plugins {
     id 'java-library'
     id 'eclipse'
@@ -6,6 +8,17 @@ plugins {
     // Version List: https://projects.neoforged.net/neoforged/ModDevGradle
     id 'net.neoforged.moddev' version "${mdg_version}"
     id "com.dorongold.task-tree" version "4.0.0"
+    id 'com.gradleup.shadow' version '8.3.3'
+}
+
+configurations {
+    shade
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    configurations = [project.configurations.shade]
+    relocate 'tamaized.beanification', 'tamaized.voidfog.beanification'
 }
 
 def secrets = new Properties()
@@ -61,6 +74,20 @@ neoForge {
     unitTest {
         enable()
         testedMod = mods.voidfog
+        project.afterEvaluate {
+            idea {
+                project {
+                    settings {
+                        runConfigurations {
+                            defaults(JUnit) {
+                                vmParameters += " -Dforge.logging.console.level=debug"
+                                vmParameters += " -Dforge.logging.marker.scan=ACCEPT"
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     runs {
@@ -93,6 +120,10 @@ neoForge {
 repositories {
     mavenLocal()
     maven {
+        name 'Tama\'s Maven' // Beanification
+        url 'https://maven.tamaized.com/releases/'
+    }
+    maven {
         name 'Jared\'s Maven' // JEI
         url 'https://maven.blamejared.com/'
     }
@@ -100,6 +131,12 @@ repositories {
 
 dependencies {
     runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
+
+    def beanification = "tamaized:beanification:${project.minecraft_version}-${project.beanification_version}"
+    implementation beanification
+    shade beanification
+    testImplementation "${beanification}:tests"
+    compileOnly "${beanification}:test-sources"
 
     testImplementation group: 'net.neoforged', name: 'testframework', version: project.neoforge_version
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.10.3'
@@ -109,6 +146,16 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    testLogging {
+        events "failed"
+
+        showExceptions true
+        exceptionFormat "full"
+        showCauses true
+        showStackTraces true
+
+        showStandardStreams = false
+    }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -170,3 +217,5 @@ tasks.register('sourceJar', Jar) {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+build.dependsOn shadowJar
