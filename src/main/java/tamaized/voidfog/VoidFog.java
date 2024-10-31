@@ -9,11 +9,14 @@ public class VoidFog {
 	public static final String MODID = "voidfog";
 
 	static {
+		BeanContext.configure()
+			.configurableSettings().disableRegistry()
+			.configurableSettings().disableRenderer()
+			.configurableSettings().disableEntity();
 		BeanContext.init();
 	}
 
 	public VoidFog() {
-		BeanContext.enableMainModClassInjections(this);
 
 	}
 
