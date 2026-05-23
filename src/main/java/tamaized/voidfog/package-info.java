@@ -1,7 +1,9 @@
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
+@TypeUseAreNonnullByDefault
 package tamaized.voidfog;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
+import com.mojang.logging.annotations.MethodsReturnNonnullByDefault;
+import tamaized.pkginfoutil.TypeUseAreNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;

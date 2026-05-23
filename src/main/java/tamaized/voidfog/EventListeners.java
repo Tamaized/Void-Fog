@@ -1,6 +1,5 @@
 package tamaized.voidfog;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -39,7 +38,7 @@ public class EventListeners {
 	private void renderFogListener(ViewportEvent.RenderFog event) {
 		if (active || fog < 1F) {
 			float f = config.distance.get().floatValue();
-			f = f >= event.getFarPlaneDistance() ? event.getFarPlaneDistance() : Mth.clampedLerp(f, event.getFarPlaneDistance(), fog);
+			f = f >= event.getFarPlaneDistance() ? event.getFarPlaneDistance() : Mth.clampedLerp(fog, f, event.getFarPlaneDistance());
 			float shift = (float) ((active ? (fog > 0.5F ? 0.005F : 0.001F) : (fog > 0.25F ? 0.01F : 0.001F)) * event.getPartialTick());
 			if (active)
 				fog -= shift;
@@ -47,8 +46,8 @@ public class EventListeners {
 				fog += shift;
 			fog = Mth.clamp(fog, 0F, 1F);
 
-			RenderSystem.setShaderFogStart(0.0F);
-			RenderSystem.setShaderFogEnd(f);
+			event.setNearPlaneDistance(0F);
+			event.setFarPlaneDistance(f);
 		}
 	}
 
@@ -58,7 +57,7 @@ public class EventListeners {
 			for (int i = 0; i < 3; i++) {
 				final float real = realColors[i];
 				final float c = 0;
-				colors[i] = real == c ? c : Mth.clampedLerp(real, c, color);
+				colors[i] = real == c ? c : Mth.clampedLerp(color, real, c);
 			}
 			if (active)
 				color += (float) (0.1F * event.getPartialTick());
@@ -75,9 +74,10 @@ public class EventListeners {
 		if (event.getEntity() != Minecraft.getInstance().player)
 			return;
 
-		if (event.getEntity().level() != null &&
-				(event.getEntity().getY() <= event.getEntity().level().getMinBuildHeight() + config.y.get()
-						&& config.whitelistToggle.get() == config.blacklistedDims.get().contains(event.getEntity().level().dimension().location().toString())
+		final int effectiveYLevel = event.getEntity().level().getMinY() + config.y.get();
+
+		if (((event.getEntity().getY() <= effectiveYLevel && event.getEntity().level().getSeaLevel() > effectiveYLevel)
+						&& config.whitelistToggle.get() == config.blacklistedDims.get().contains(event.getEntity().level().dimension().identifier().toString())
 				) || dimensionUtil.checkForVoidscapeDimension(event.getEntity().level())
 		) {
 			active = !event.getEntity().hasEffect(MobEffects.NIGHT_VISION);

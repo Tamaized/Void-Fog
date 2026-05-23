@@ -9,7 +9,7 @@ public class VoidFog {
 	public static final String MODID = "voidfog";
 
 	static {
-		BeanContext.init();
+		BeanContext.init(MODID);
 	}
 
 	public VoidFog() {

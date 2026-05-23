@@ -17,6 +17,13 @@ license="All Rights Reserved"
 [[dependencies.voidfog]]
     modId="neoforge"
     type="required"
-    versionRange="[21,)"
+    versionRange="[26,)"
     ordering="NONE"
-    side="BOTH"
+    side="CLIENT"
+
+[[dependencies.voidfog]]
+	modId="neoforge"
+	type="incompatible"
+	versionRange=""
+	ordering="NONE"
+	side="SERVER"

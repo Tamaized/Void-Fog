@@ -1,4 +1,15 @@
-import org.jetbrains.gradle.ext.JUnit
+buildscript {
+	repositories {
+		mavenLocal()
+		maven {
+			name 'Beanification'
+			url 'https://maven.tamaized.com/releases/'
+		}
+	}
+	dependencies {
+		classpath "tamaized:beanification:${beanification_version}:gradle"
+	}
+}
 
 plugins {
     id 'java-library'
@@ -8,7 +19,22 @@ plugins {
     // Version List: https://projects.neoforged.net/neoforged/ModDevGradle
     id 'net.neoforged.moddev' version "${mdg_version}"
     id "com.dorongold.task-tree" version "4.0.0"
-    id 'com.gradleup.shadow' version '8.3.3'
+	id 'com.gradleup.shadow' version "${shadowjar_version}"
+}
+
+apply plugin: 'tamaized.beanification'
+
+repositories {
+	gradlePluginPortal()
+}
+
+dependencies { // Forces intellij to grab sources for the gradle build script
+	compileOnly "com.gradleup.shadow:shadow-gradle-plugin:${shadowjar_version}"
+}
+
+wrapper {
+	gradleVersion = '9.1.0'
+	distributionType = Wrapper.DistributionType.ALL
 }
 
 configurations {
@@ -16,9 +42,11 @@ configurations {
 }
 
 shadowJar {
+	mustRunAfter jar
     archiveClassifier.set('')
     configurations = [project.configurations.shade]
     relocate 'tamaized.beanification', 'tamaized.voidfog.beanification'
+    relocate 'tamaized.pkginfoutil', 'tamaized.voidfog.pkginfoutil'
 }
 
 def secrets = new Properties()
@@ -46,7 +74,7 @@ idea {
 }
 
 version = "${project.minecraft_version}-${project.mod_major_version}." + (hasProperty("CIVersion") ? CIVersion : mod_version)
-group = "tamaized.voidfog"
+group = "tamaized.${project.mod_id}"
 
 base {
     archivesName = "VoidFog"
@@ -54,73 +82,96 @@ base {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
 
 compileJava.options.compilerArgs << "-Xlint:all,-classfile,-processing,-deprecation,-this-escape" << "-Werror"
 
+sourceSets {
+	data {
+		compileClasspath += main.compileClasspath + main.output
+
+		java {
+			srcDirs = ['src/main/java', 'src/data/java']
+		}
+		resources {
+			srcDirs = ['src/main/resources']
+		}
+	}
+	dataForPublishing {
+		compileClasspath += data.compileClasspath
+
+		java {
+			srcDirs = ['src/data/java']
+		}
+	}
+}
+
+configurations {
+	dataImplementation.extendsFrom implementation
+}
+
 neoForge {
-    version = project.neoforge_version
+	def mod_id = project.mod_id
+	version = project.neoforge_version
 
     validateAccessTransformers = true
 
     mods {
-        voidfog {
-            sourceSet this.sourceSets.main
-        }
+		"${mod_id}" {
+			it.sourceSet this.sourceSets.main
+		}
+
+		"${mod_id}-data" {
+			it.sourceSet this.sourceSets.main
+			it.sourceSet this.sourceSets.data
+		}
     }
 
-    unitTest {
-        enable()
-        testedMod = mods.voidfog
-        project.afterEvaluate {
-            idea {
-                project {
-                    settings {
-                        runConfigurations {
-                            defaults(JUnit) {
-                                vmParameters += " -Dforge.logging.console.level=debug"
-                                vmParameters += " -Dforge.logging.marker.scan=ACCEPT"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+	def mainMod = mods."${project.mod_id}"
+	def dataMod = mods."${project.mod_id}-data"
+
+	unitTest {
+		enable()
+		testedMod = mainMod
+		loadedMods = [mainMod]
+	}
 
     runs {
-        configureEach {
-            gameDirectory = project.file('run')
-            systemProperty 'forge.logging.console.level', 'debug'
-            logLevel = org.slf4j.event.Level.DEBUG
-        }
+		configureEach {
+			gameDirectory = project.file('run')
+			systemProperty 'forge.logging.console.level', 'debug'
+			logLevel = org.slf4j.event.Level.DEBUG
+			loadedMods = [mainMod]
+		}
 
-        client {
-            client()
-            systemProperty 'forge.enabledGameTestNamespaces', mod_id
-            programArguments.addAll '--username', secrets.getProperty("username") ?: 'Dev', secrets.getProperty("uuid") ? '--uuid' : '', secrets.getProperty("uuid") ?: ''
-        }
+		client {
+			client()
+			systemProperty 'forge.enabledGameTestNamespaces', mod_id
+			programArguments.addAll '--username', secrets.getProperty("username") ?: 'Dev', secrets.getProperty("uuid") ? '--uuid' : '', secrets.getProperty("uuid") ?: ''
+		}
 
-        server {
-            server()
-            systemProperty 'forge.enabledGameTestNamespaces', mod_id
-            programArgument '--nogui'
-        }
+		server {
+			server()
+			systemProperty 'forge.enabledGameTestNamespaces', mod_id
+			programArgument '--nogui'
+		}
 
-        data {
-            data()
-            gameDirectory = project.file('run-data')
-            programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-        }
+		data {
+			clientData()
+			gameDirectory = project.file('run-data')
+			programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+			sourceSet = this.sourceSets.data
+			loadedMods = [dataMod]
+		}
     }
 }
 
 repositories {
     mavenLocal()
     maven {
-        name 'Tama\'s Maven' // Beanification
+        name 'Tama\'s Maven'
         url 'https://maven.tamaized.com/releases/'
     }
     maven {
@@ -130,18 +181,23 @@ repositories {
 }
 
 dependencies {
-    runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
+    // runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
 
-    def beanification = "tamaized:beanification:${project.minecraft_version}-${project.beanification_version}"
-    implementation beanification
-    shade beanification
-    testImplementation "${beanification}:tests"
-    compileOnly "${beanification}:test-sources"
+	def beanification = "tamaized:beanification:${project.beanification_version}"
+	implementation beanification
+	shade beanification
+	testImplementation "${beanification}:tests"
+	testCompileOnly "${beanification}:test-sources"
 
-    testImplementation group: 'net.neoforged', name: 'testframework', version: project.neoforge_version
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.10.3'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.3'
-    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '5.12.0'
+	def pkgInfoUtil = "tamaized:pkginfoutil:${project.pkginfoutil_version}"
+	implementation pkgInfoUtil
+	shade pkgInfoUtil
+
+	testImplementation "net.neoforged:testframework:${project.neoforge_version}"
+	testImplementation "org.junit.jupiter:junit-jupiter:6.0.1"
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:6.0.1"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher:6.0.1"
+	testImplementation "org.mockito:mockito-junit-jupiter:5.21.0"
 }
 
 test {
@@ -158,13 +214,16 @@ test {
     }
 }
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+sourceSets.main.resources {
+	srcDir 'src/generated/resources'
+	exclude '.cache'
+}
 
 processResources {
 	def ver = project.version
 	filesMatching("META-INF/neoforge.mods.toml") {
 		expand([
-			'file'           : [
+			'file': [
 				'jarVersion': ver
 			]
 		])
@@ -192,7 +251,7 @@ publishing {
     publications {
         create('mavenJava', MavenPublication) {
             afterEvaluate {
-                artifact this.project.jar
+                artifact this.project.shadowJar
                 artifact this.project.sourceJar
             }
             groupId 'tamaized'
@@ -211,13 +270,13 @@ publishing {
 }
 
 tasks.register('sourceJar', Jar) {
-    dependsOn 'classes'
-    from sourceSets.main.allSource
-    archiveClassifier = 'sources'
+	dependsOn 'classes'
+	from sourceSets.main.allSource
+	archiveClassifier = 'sources'
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
+	options.encoding = 'UTF-8'
 }
 
 build.dependsOn shadowJar
