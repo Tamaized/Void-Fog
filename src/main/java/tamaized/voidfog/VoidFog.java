@@ -1,7 +1,7 @@
 package tamaized.voidfog;
 
 import net.neoforged.fml.common.Mod;
-import tamaized.beanification.BeanContext;
+import tamaized.beanification.connector.fml.FMLBeanContextConnector;
 
 @Mod(VoidFog.MODID)
 public class VoidFog {
@@ -9,7 +9,7 @@ public class VoidFog {
 	public static final String MODID = "voidfog";
 
 	static {
-		BeanContext.init(MODID);
+		FMLBeanContextConnector.init(MODID);
 	}
 
 	public VoidFog() {

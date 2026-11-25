@@ -12,7 +12,7 @@ import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import tamaized.beanification.Autowired;
 import tamaized.beanification.Component;
-import tamaized.beanification.PostConstruct;
+import tamaized.beanification.connector.fml.EventBusPostConstruct;
 
 @Component
 public class EventListeners {
@@ -28,7 +28,7 @@ public class EventListeners {
 	private float color = 0F;
 	private float fog = 1F;
 
-	@PostConstruct(PostConstruct.Bus.GAME)
+	@EventBusPostConstruct(EventBusPostConstruct.Bus.GAME)
 	private void postConstruct(IEventBus bus) {
 		bus.addListener(this::renderFogListener);
 		bus.addListener(this::computeFogColorListener);

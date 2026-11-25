@@ -7,7 +7,7 @@ buildscript {
 		}
 	}
 	dependencies {
-		classpath "tamaized:beanification:${beanification_version}:gradle"
+		classpath "tamaized:beanification-fml-connector:${beanification_version}:gradle"
 	}
 }
 
@@ -183,7 +183,7 @@ repositories {
 dependencies {
     // runtimeOnly "mezz.jei:jei-${project.base_minecraft_version}-neoforge:${project.jei_version}"
 
-	def beanification = "tamaized:beanification:${project.beanification_version}"
+	def beanification = "tamaized:beanification-fml-connector:${project.beanification_version}"
 	implementation beanification
 	shade beanification
 	testImplementation "${beanification}:tests"
