@@ -1,9 +1,4 @@
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
-@TypeUseAreNonnullByDefault
+@NullMarked
 package tamaized.voidfog;
 
-import com.mojang.logging.annotations.MethodsReturnNonnullByDefault;
-import tamaized.pkginfoutil.TypeUseAreNonnullByDefault;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

@@ -39,7 +39,7 @@ public class EventListeners {
 		if (active || fog < 1F) {
 			float f = config.distance.get().floatValue();
 			f = f >= event.getFarPlaneDistance() ? event.getFarPlaneDistance() : Mth.clampedLerp(fog, f, event.getFarPlaneDistance());
-			float shift = (float) ((active ? (fog > 0.5F ? 0.005F : 0.001F) : (fog > 0.25F ? 0.01F : 0.001F)) * event.getPartialTick());
+			float shift = (active ? (fog > 0.5F ? 0.005F : 0.001F) : (fog > 0.25F ? 0.01F : 0.001F)) * event.getPartialTick();
 			if (active)
 				fog -= shift;
 			else
@@ -60,9 +60,9 @@ public class EventListeners {
 				colors[i] = real == c ? c : Mth.clampedLerp(color, real, c);
 			}
 			if (active)
-				color += (float) (0.1F * event.getPartialTick());
+				color += 0.1F * event.getPartialTick();
 			else
-				color -= (float) (0.005F * event.getPartialTick());
+				color -= 0.005F * event.getPartialTick();
 			color = Mth.clamp(color, 0F, 1F);
 			event.setRed(colors[0]);
 			event.setGreen(colors[1]);

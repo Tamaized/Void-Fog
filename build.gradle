@@ -46,7 +46,6 @@ shadowJar {
     archiveClassifier.set('')
     configurations = [project.configurations.shade]
     relocate 'tamaized.beanification', 'tamaized.voidfog.beanification'
-    relocate 'tamaized.pkginfoutil', 'tamaized.voidfog.pkginfoutil'
 }
 
 def secrets = new Properties()
@@ -188,10 +187,6 @@ dependencies {
 	shade beanification
 	testImplementation "${beanification}:tests"
 	testCompileOnly "${beanification}:test-sources"
-
-	def pkgInfoUtil = "tamaized:pkginfoutil:${project.pkginfoutil_version}"
-	implementation pkgInfoUtil
-	shade pkgInfoUtil
 
 	testImplementation "net.neoforged:testframework:${project.neoforge_version}"
 	testImplementation "org.junit.jupiter:junit-jupiter:6.0.1"
